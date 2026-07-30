@@ -6,51 +6,48 @@
 <title>2026 週年慶遊戲</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%}
+html,body{min-height:100%}
 body{
   background:radial-gradient(ellipse at top,#2a1010 0%,#1c0d0d 70%);
   color:#ffd76a;
   font-family:"Microsoft JhengHei","PingFang TC","Noto Sans TC",sans-serif;
   display:flex;flex-direction:column;align-items:center;justify-content:center;
-  gap:5vh;padding:20px;
+  gap:4vh;padding:24px 16px;min-height:100vh;
 }
 h1{
   font-size:clamp(30px,6vw,64px);letter-spacing:6px;
   text-shadow:0 0 16px rgba(255,215,106,.4);text-align:center;
 }
-.games{display:flex;gap:4vw;flex-wrap:wrap;justify-content:center}
+.games{display:flex;gap:3vw;flex-wrap:wrap;justify-content:center;align-items:stretch}
 a.game{
-  display:flex;flex-direction:column;align-items:center;gap:2vh;
-  background:#2b1414;border:3px solid #7a5a2a;border-radius:24px;
-  padding:5vh 6vw;text-decoration:none;color:#ffd76a;
-  transition:transform .1s ease;
+  display:flex;flex-direction:column;align-items:center;gap:1.6vh;
+  background:#2b1414;border:3px solid #7a5a2a;border-radius:26px;
+  padding:16px 16px 2vh;text-decoration:none;color:#ffd76a;
+  width:min(88vw,30vw,56vh);min-width:260px;
+  transition:transform .12s ease;
 }
 a.game:hover{
-  transform:scale(1.05);border-color:#d4a017;
-  box-shadow:0 0 20px rgba(255,215,106,.35);
+  transform:scale(1.04);border-color:#d4a017;
+  box-shadow:0 0 24px rgba(255,215,106,.4);
 }
-.icon{font-size:clamp(60px,12vh,120px);line-height:1}
-.name{font-size:clamp(24px,4.5vh,44px);font-weight:900;letter-spacing:4px}
-.desc{font-size:clamp(14px,2.2vh,20px);color:#b3945f}
+a.game img{width:100%;height:auto;border-radius:18px;display:block}
+.desc{font-size:clamp(15px,2.4vh,22px);color:#e8c987;letter-spacing:2px;text-align:center}
 </style>
 </head>
 <body>
 <h1>🏮 2026 週年慶遊戲 🏮</h1>
 <div class="games">
   <a class="game" href="bingo.html">
-    <span class="icon">🙏</span>
-    <span class="name">神仙賓果樂</span>
+    <img src="img/bingo.png" alt="神仙賓果樂">
     <span class="desc">36 尊仙佛・抽籤對號賓果</span>
   </a>
   <a class="game" href="dice.html">
-    <span class="icon">🎲</span>
-    <span class="name">歡樂骰子王</span>
+    <img src="img/dice.png" alt="歡樂骰子王">
     <span class="desc">四顆骰子・選號對獎</span>
   </a>
   <a class="game" href="https://script.google.com/macros/s/AKfycbwtj0WI6GPldwi5jfUVeboLuVi9s22FT2nfdcP1NwsfSgpdPsT1koJcao0_0TwS1Fnu/exec?page=score">
-    <span class="icon">🙌</span>
-    <span class="name">比手畫腳</span>
-    <span class="desc">即時計分榜</span>
+    <img src="img/charades.png" alt="比手畫腳">
+    <span class="desc">一起來猜題・即時計分榜</span>
   </a>
 </div>
 </body>
