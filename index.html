@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>2026 週年慶遊戲</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  background:radial-gradient(ellipse at top,#2a1010 0%,#1c0d0d 70%);
+  color:#ffd76a;
+  font-family:"Microsoft JhengHei","PingFang TC","Noto Sans TC",sans-serif;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:5vh;padding:20px;
+}
+h1{
+  font-size:clamp(30px,6vw,64px);letter-spacing:6px;
+  text-shadow:0 0 16px rgba(255,215,106,.4);text-align:center;
+}
+.games{display:flex;gap:4vw;flex-wrap:wrap;justify-content:center}
+a.game{
+  display:flex;flex-direction:column;align-items:center;gap:2vh;
+  background:#2b1414;border:3px solid #7a5a2a;border-radius:24px;
+  padding:5vh 6vw;text-decoration:none;color:#ffd76a;
+  transition:transform .1s ease;
+}
+a.game:hover{
+  transform:scale(1.05);border-color:#d4a017;
+  box-shadow:0 0 20px rgba(255,215,106,.35);
+}
+.icon{font-size:clamp(60px,12vh,120px);line-height:1}
+.name{font-size:clamp(24px,4.5vh,44px);font-weight:900;letter-spacing:4px}
+.desc{font-size:clamp(14px,2.2vh,20px);color:#b3945f}
+</style>
+</head>
+<body>
+<h1>🏮 2026 週年慶遊戲 🏮</h1>
+<div class="games">
+  <a class="game" href="bingo.html">
+    <span class="icon">🙏</span>
+    <span class="name">神仙賓果樂</span>
+    <span class="desc">36 尊仙佛・抽籤對號賓果</span>
+  </a>
+  <a class="game" href="dice.html">
+    <span class="icon">🎲</span>
+    <span class="name">歡樂骰子王</span>
+    <span class="desc">四顆骰子・選號對獎</span>
+  </a>
+</div>
+</body>
+</html>

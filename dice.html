@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>歡樂骰子王</title>
+<style>
+:root{
+  --bg:#1c0d0d;
+  --panel:#2b1414;
+  --line:#7a5a2a;
+  --gold:#ffd76a;
+  --gold-deep:#d4a017;
+  --dim:#b3945f;
+  --red:#c0392b;
+  --ink:#5a1212;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  background:radial-gradient(ellipse at top,#2a1010 0%,var(--bg) 70%);
+  color:var(--gold);
+  font-family:"Microsoft JhengHei","PingFang TC","Noto Sans TC",sans-serif;
+  overflow:hidden;
+}
+#app{height:100vh;display:flex;flex-direction:column;padding:10px 14px;gap:8px}
+
+/* ===== 頂列 ===== */
+header{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+header h1{font-size:clamp(20px,2.6vw,34px);letter-spacing:3px;text-shadow:0 0 12px rgba(255,215,106,.35)}
+.spacer{flex:1}
+.btn{
+  background:var(--panel);color:var(--gold);border:1px solid var(--line);
+  border-radius:10px;padding:8px 14px;font-size:clamp(13px,1.4vw,17px);
+  font-family:inherit;cursor:pointer;white-space:nowrap;
+}
+.btn:hover{background:#3a1c1c;border-color:var(--gold-deep)}
+.btn.warn{color:#ff9d9d;border-color:#7a3a3a}
+
+/* 模式切換 */
+#modeSeg{display:flex;border:1px solid var(--line);border-radius:999px;overflow:hidden}
+.mbtn{
+  background:var(--panel);color:var(--dim);border:none;
+  padding:8px 18px;font-size:clamp(13px,1.6vw,19px);font-weight:700;
+  cursor:pointer;font-family:inherit;white-space:nowrap;
+}
+.mbtn.active{
+  background:linear-gradient(160deg,#ffe9a8,#f0c04a 55%,#d4a017);
+  color:var(--ink);
+}
+
+/* ===== 局次頁籤 ===== */
+#tabs{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.tab{
+  background:var(--panel);color:var(--dim);border:1px solid var(--line);
+  border-radius:999px;padding:6px 18px;font-size:clamp(15px,1.8vw,22px);
+  font-weight:700;cursor:pointer;font-family:inherit;
+}
+.tab.active{
+  background:linear-gradient(160deg,#ffe9a8,#f0c04a 55%,#d4a017);
+  color:var(--ink);border-color:#fff0c0;
+}
+#tabCount{font-size:clamp(14px,1.6vw,20px);color:var(--dim);margin-left:6px}
+
+/* ===== 開骰結果大卡片 ===== */
+#board{
+  flex:1;display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:center;
+  min-height:0;overflow-y:auto;padding:4px;
+}
+#board::-webkit-scrollbar{width:8px}
+#board::-webkit-scrollbar-thumb{background:var(--line);border-radius:4px}
+#empty{
+  width:100%;align-self:stretch;display:flex;align-items:center;justify-content:center;
+  color:var(--dim);font-size:clamp(20px,3vw,40px);text-align:center;line-height:1.6;
+}
+.card{
+  position:relative;
+  flex:1 1 30%;min-width:240px;max-width:48%;
+  background:var(--panel);border:3px solid #4a2c1a;border-radius:22px;
+  display:flex;flex-direction:column;align-items:center;gap:1.2vh;
+  padding:2.5vh 12px 2vh;
+}
+.card.latest{
+  background:linear-gradient(160deg,#3d2408,#4a2c08);
+  border-color:var(--gold-deep);
+  box-shadow:0 0 18px rgba(255,215,106,.4);
+}
+.rlabel{font-size:clamp(16px,3.2vh,32px);color:var(--dim);letter-spacing:3px;font-weight:700}
+.card.latest .rlabel{color:var(--gold)}
+.card .dice{display:flex;gap:8px}
+.card .total{
+  font-size:clamp(56px,min(19vh,10vw),230px);font-weight:900;color:var(--gold);
+  line-height:1.05;text-shadow:0 0 24px rgba(255,215,106,.45);
+}
+.card .total small{font-size:.3em;font-weight:700;color:var(--dim)}
+.del{
+  position:absolute;top:8px;right:12px;
+  background:none;border:none;color:#7a4a4a;font-size:clamp(16px,2.6vh,28px);
+  cursor:pointer;padding:4px 6px;font-family:inherit;
+}
+.del:hover{color:#ff9d9d}
+
+/* ===== 骰子(CSS 畫點) ===== */
+.die{
+  --dsize:clamp(34px,6vh,64px);
+  width:var(--dsize);height:var(--dsize);flex:none;
+  background:linear-gradient(145deg,#fff,#e8e2d0);
+  border-radius:18%;border:1px solid #b9ab88;
+  display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);
+  padding:12%;
+  box-shadow:inset 0 -2px 4px rgba(0,0,0,.15);
+}
+.die.small{--dsize:clamp(32px,6vh,72px)}
+.pip{width:70%;height:70%;border-radius:50%;background:#222;align-self:center;justify-self:center}
+.die.redface .pip{background:var(--red)}
+.pip.c1{grid-area:1/1}.pip.c2{grid-area:1/2}.pip.c3{grid-area:1/3}
+.pip.c4{grid-area:2/1}.pip.c5{grid-area:2/2}.pip.c6{grid-area:2/3}
+.pip.c7{grid-area:3/1}.pip.c8{grid-area:3/2}.pip.c9{grid-area:3/3}
+.die.big1 .pip{width:130%;height:130%}
+
+/* ===== 輸入區:按總分 ===== */
+#entry{
+  flex:none;background:linear-gradient(180deg,#3a1616,#2b1010);
+  border:2px solid var(--line);border-radius:16px;
+  padding:10px 14px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+}
+#totals{display:flex;gap:6px;flex-wrap:wrap;flex:1;justify-content:center}
+.tbtn{
+  background:linear-gradient(145deg,#fff,#e8e2d0);color:#333;
+  border:1px solid #b9ab88;border-radius:12px;
+  min-width:clamp(44px,6.5vh,70px);height:clamp(44px,6.5vh,70px);
+  font-size:clamp(20px,3.4vh,34px);font-weight:900;font-family:inherit;cursor:pointer;
+  box-shadow:inset 0 -3px 5px rgba(0,0,0,.15);
+  transition:transform .08s ease;
+}
+.tbtn:hover{transform:scale(1.1);border-color:var(--gold-deep)}
+.tbtn.lo,.tbtn.hi{color:var(--red)}
+.hint{color:var(--dim);font-size:clamp(12px,1.6vh,16px);width:100%;text-align:center}
+#btnRollStart{
+  background:linear-gradient(160deg,#ffe9a8,#f0c04a 55%,#d4a017);color:var(--ink);
+  border:none;border-radius:14px;padding:10px 24px;
+  font-size:clamp(18px,3.2vh,32px);font-weight:900;font-family:inherit;cursor:pointer;
+  letter-spacing:2px;transition:transform .08s ease;
+}
+#btnRollStart:hover{transform:scale(1.06)}
+
+/* ===== 擲骰動畫覆蓋層 ===== */
+#rollOverlay{
+  position:fixed;inset:0;background:rgba(10,4,4,.92);z-index:60;
+  display:none;flex-direction:column;align-items:center;justify-content:center;gap:4vh;
+}
+#rollOverlay.show{display:flex}
+#rollName{font-size:clamp(28px,7vh,70px);font-weight:700;letter-spacing:4px;color:var(--gold)}
+#rollDice{display:flex;gap:3vw}
+#rollDice .die{--dsize:clamp(96px,26vh,280px);border-radius:16%;border-width:3px}
+.dwrap{display:inline-block}
+.dwrap.rolling{animation:tumble .28s linear infinite}
+@keyframes tumble{
+  0%{transform:rotate(-10deg) translateY(-6%)}
+  50%{transform:rotate(8deg) translateY(6%)}
+  100%{transform:rotate(-10deg) translateY(-6%)}
+}
+#rollTotal{
+  visibility:hidden;
+  background:var(--red);color:#fff;border-radius:24px;
+  padding:0 5vw;font-size:clamp(60px,17vh,190px);font-weight:900;line-height:1.25;
+  box-shadow:0 0 30px rgba(255,80,60,.5);
+}
+#rollTotal.show{visibility:visible;animation:pop .4s ease}
+@keyframes pop{0%{transform:scale(.4);opacity:0}60%{transform:scale(1.15)}100%{transform:scale(1)}}
+#rollHint{color:var(--dim);font-size:clamp(13px,2vh,18px)}
+#rollTotals{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;max-width:92vw}
+#rollTotals .tbtn{
+  min-width:clamp(44px,6.5vh,68px);height:clamp(44px,6.5vh,68px);
+  font-size:clamp(20px,3.2vh,32px);
+}
+#rollOverlay.settling #rollTotals{display:none}
+</style>
+</head>
+<body>
+
+<div id="app">
+  <header>
+    <h1>🎲 歡樂骰子王</h1>
+    <div id="modeSeg">
+      <button class="mbtn" id="modeSingle">分次擲</button>
+      <button class="mbtn" id="modeTriple">連擲3次</button>
+    </div>
+    <div id="tabs"></div>
+    <span class="spacer"></span>
+    <button class="btn" id="btnFull">⛶ 全螢幕</button>
+    <button class="btn warn" id="btnClearRound">🧹 清空本局</button>
+    <button class="btn warn" id="btnResetAll">🔄 全部重來</button>
+  </header>
+
+  <div id="board"></div>
+
+  <div id="entry">
+    <button id="btnRollStart">🎲 開始擲骰</button>
+    <div id="totals"></div>
+    <div class="hint">按「開始擲骰」→ 畫面骰子一直滾動 → 現場開出後按總分 → 大字顯示結果，大家對自己選的三個號碼（鍵盤：打數字按 Enter；Esc 取消）</div>
+  </div>
+</div>
+
+<div id="rollOverlay">
+  <div id="rollName"></div>
+  <div id="rollDice"></div>
+  <div id="rollTotal"></div>
+  <div id="rollTotals"></div>
+  <div id="rollHint"></div>
+</div>
+
+<script>
+var LS='dice4_state';
+var PIPS={1:[5],2:[3,7],3:[3,5,7],4:[1,3,7,9],5:[1,3,5,7,9],6:[1,3,4,6,7,9]};
+
+function loadState(){
+  try{ var v=localStorage.getItem(LS); if(v) return JSON.parse(v); }catch(e){}
+  return {rounds:[[],[],[],[]],cur:0};
+}
+function save(){ try{ localStorage.setItem(LS,JSON.stringify(state)); }catch(e){} }
+
+var state=loadState();
+if(!state.rounds||!state.rounds.length) state={rounds:[[],[],[],[]],cur:0};
+if(state.cur>=state.rounds.length) state.cur=0;
+if(state.mode!=='triple') state.mode='single';
+
+var $=function(id){ return document.getElementById(id); };
+
+/* 產生一顆骰子(1、4 紅點,台灣習慣) */
+function makeDie(v,small){
+  var d=document.createElement('div');
+  d.className='die'+(small?' small':'')+((v===1||v===4)?' redface':'')+(v===1?' big1':'');
+  PIPS[v].forEach(function(c){
+    var p=document.createElement('span');
+    p.className='pip c'+c;
+    d.appendChild(p);
+  });
+  return d;
+}
+function sum(arr){ return arr.reduce(function(a,b){ return a+b; },0); }
+
+/* 湊出總分等於 total 的四顆骰子組合 */
+function comboFor(total){
+  var d=[1,1,1,1], extra=total-4;
+  while(extra>0){
+    var i=Math.floor(Math.random()*4);
+    if(d[i]<6){ d[i]++; extra--; }
+  }
+  return d;
+}
+
+/* ===== 局次頁籤 ===== */
+function renderTabs(){
+  var t=$('tabs');
+  t.innerHTML='';
+  state.rounds.forEach(function(r,i){
+    var b=document.createElement('button');
+    b.className='tab'+(i===state.cur?' active':'');
+    b.textContent='第'+(i+1)+'局';
+    b.onclick=function(){ state.cur=i; save(); render(); };
+    t.appendChild(b);
+  });
+  var add=document.createElement('button');
+  add.className='tab';
+  add.textContent='＋加一局';
+  add.onclick=function(){
+    state.rounds.push([]);
+    state.cur=state.rounds.length-1;
+    save(); render();
+  };
+  t.appendChild(add);
+  var c=document.createElement('span');
+  c.id='tabCount';
+  c.textContent='本局已開 '+state.rounds[state.cur].length+' 擲';
+  t.appendChild(c);
+}
+
+/* ===== 開骰結果大卡片(依開出順序,不排名) ===== */
+function renderBoard(){
+  var list=state.rounds[state.cur];
+  var board=$('board');
+  board.innerHTML='';
+  if(list.length===0){
+    var e=document.createElement('div');
+    e.id='empty';
+    e.textContent='第'+(state.cur+1)+'局尚未開骰\n按下方「🎲 開始擲骰」';
+    e.style.whiteSpace='pre-line';
+    board.appendChild(e);
+    return;
+  }
+  list.forEach(function(en,i){
+    var s=sum(en.d);
+
+    var card=document.createElement('div');
+    card.className='card'+(i===list.length-1?' latest':'');
+
+    var lb=document.createElement('div');
+    lb.className='rlabel';
+    lb.textContent='第 '+(i+1)+' 擲';
+    card.appendChild(lb);
+
+    var dc=document.createElement('div');
+    dc.className='dice';
+    en.d.forEach(function(v){ dc.appendChild(makeDie(v,true)); });
+    card.appendChild(dc);
+
+    var tt=document.createElement('div');
+    tt.className='total';
+    tt.innerHTML=s+'<small> 分</small>';
+    card.appendChild(tt);
+
+    var del=document.createElement('button');
+    del.className='del';
+    del.textContent='✕';
+    del.title='刪除這一擲';
+    del.onclick=function(){
+      if(!confirm('刪除「第 '+(i+1)+' 擲　'+s+' 分」？')) return;
+      list.splice(i,1);
+      save(); render();
+    };
+    card.appendChild(del);
+
+    board.appendChild(card);
+  });
+}
+
+/* ===== 總分按鈕 4~24(主畫面+滾動畫面各一組) ===== */
+function fillTotals(container,handler){
+  for(var s=4;s<=24;s++){
+    (function(s){
+      var b=document.createElement('button');
+      b.className='tbtn'+(s<=8?' lo':(s>=20?' hi':''));
+      b.textContent=s;
+      b.onclick=function(ev){ ev.stopPropagation(); handler(s); };
+      container.appendChild(b);
+    })(s);
+  }
+}
+function renderTotals(){
+  if(!$('totals').hasChildNodes()) fillTotals($('totals'),settleRoll);
+  if(!$('rollTotals').hasChildNodes()) fillTotals($('rollTotals'),settleRoll);
+}
+
+/* ===== 擲骰動畫:兩階段 =====
+   phase 'idle'  = 骰子持續滾動,等主持人按總分
+   phase 'settle'= 收尾:依序停下→亮總分→自動記錄 */
+var phase=null, rollTimers=[], rollDone=null, rollWraps=[], rollSettled=[], rollIv=null;
+var sessionLeft=0, sessionTotal=1; // 連擲模式:一組還剩幾擲/共幾擲
+
+function startIdle(){
+  if(phase) return;
+  phase='idle';
+  var list=state.rounds[state.cur];
+  $('rollName').textContent='第 '+(list.length+1)+' 擲';
+  $('rollTotal').classList.remove('show');
+  $('rollOverlay').classList.remove('settling');
+  $('rollHint').textContent = sessionTotal>1
+    ? '🎲 連擲模式（'+(sessionTotal-sessionLeft+1)+' / '+sessionTotal+'）…骰完點下面的總分！（Esc 取消）'
+    : '🎲 擲骰中…骰完點下面的總分！（Esc 取消）';
+  var rd=$('rollDice');
+  rd.innerHTML='';
+  rollWraps=[];
+  rollSettled=[false,false,false,false];
+  for(var i=0;i<4;i++){
+    var w=document.createElement('span');
+    w.className='dwrap rolling';
+    w.appendChild(makeDie(1+Math.floor(Math.random()*6),false));
+    rd.appendChild(w);
+    rollWraps.push(w);
+  }
+  rollIv=setInterval(function(){
+    rollWraps.forEach(function(w,i){
+      if(rollSettled[i]) return;
+      w.innerHTML='';
+      w.appendChild(makeDie(1+Math.floor(Math.random()*6),false));
+    });
+  },90);
+  $('rollOverlay').classList.add('show');
+}
+
+function cancelIdle(){
+  if(phase!=='idle') return;
+  clearInterval(rollIv);
+  $('rollOverlay').classList.remove('show');
+  phase=null;
+  sessionLeft=0;
+}
+
+function settleRoll(total){
+  if(phase==='settle') return;
+  if(phase!=='idle'){ sessionLeft=1; sessionTotal=1; startIdle(); } // 直接按總分=單擲快速路徑
+  phase='settle';
+  $('rollOverlay').classList.add('settling');
+  $('rollHint').textContent='（點一下畫面可跳過）';
+  var list=state.rounds[state.cur];
+  var name=$('rollName').textContent;
+  var combo=comboFor(total);
+  $('rollTotal').textContent=total+' 分';
+
+  // 四顆骰子依序停下
+  rollWraps.forEach(function(w,i){
+    rollTimers.push(setTimeout(function(){
+      rollSettled[i]=true;
+      w.classList.remove('rolling');
+      w.innerHTML='';
+      w.appendChild(makeDie(combo[i],false));
+    }, 600+i*280));
+  });
+
+  // 全部停下後亮出總分
+  rollTimers.push(setTimeout(function(){
+    clearInterval(rollIv);
+    $('rollTotal').classList.add('show');
+  }, 600+3*280+150));
+
+  rollDone=function(){
+    rollTimers.forEach(function(t){ clearTimeout(t); });
+    rollTimers=[];
+    clearInterval(rollIv);
+    list.push({n:name,d:combo});
+    phase=null;
+    rollDone=null;
+    sessionLeft--;
+    save(); render();
+    if(sessionLeft>0){ startIdle(); }               // 連擲模式:自動開下一擲
+    else{ $('rollOverlay').classList.remove('show'); }
+  };
+  // 停留一下自動收尾
+  rollTimers.push(setTimeout(function(){ if(rollDone) rollDone(); }, 600+3*280+1900));
+}
+
+$('btnRollStart').onclick=function(){
+  if(phase) return;
+  sessionTotal=(state.mode==='triple')?3:1;
+  sessionLeft=sessionTotal;
+  startIdle();
+};
+$('rollOverlay').onclick=function(){ if(phase==='settle' && rollDone) rollDone(); };
+
+/* 模式切換 */
+function renderModes(){
+  $('modeSingle').classList.toggle('active', state.mode!=='triple');
+  $('modeTriple').classList.toggle('active', state.mode==='triple');
+  $('btnRollStart').textContent = state.mode==='triple' ? '🎲 開始連擲三次' : '🎲 開始擲骰';
+}
+$('modeSingle').onclick=function(){ state.mode='single'; save(); renderModes(); };
+$('modeTriple').onclick=function(){ state.mode='triple'; save(); renderModes(); };
+
+/* ===== 鍵盤:打數字按 Enter(滾動中也可用);Esc 取消 ===== */
+var keyBuf='';
+document.addEventListener('keydown',function(e){
+  if(phase==='settle'){ if(e.key==='Enter'||e.key===' '){ if(rollDone) rollDone(); } return; }
+  if(e.key>='0'&&e.key<='9'){ keyBuf=(keyBuf+e.key).slice(-2); }
+  else if(e.key==='Enter'){
+    var n=parseInt(keyBuf,10);
+    keyBuf='';
+    if(n>=4&&n<=24) settleRoll(n);
+  }
+  else if(e.key==='Escape'){ keyBuf=''; cancelIdle(); }
+});
+
+/* ===== 其他按鈕 ===== */
+$('btnClearRound').onclick=function(){
+  var list=state.rounds[state.cur];
+  if(list.length===0) return;
+  if(!confirm('清空第'+(state.cur+1)+'局的 '+list.length+' 筆紀錄？')) return;
+  state.rounds[state.cur]=[];
+  save(); render();
+};
+$('btnResetAll').onclick=function(){
+  var total=state.rounds.reduce(function(a,r){ return a+r.length; },0);
+  if(total>0 && !confirm('確定要清空全部 '+state.rounds.length+' 局、共 '+total+' 筆紀錄，全部重來嗎？')) return;
+  state={rounds:[[],[],[],[]],cur:0};
+  save(); render();
+};
+$('btnFull').onclick=function(){
+  if(document.fullscreenElement){ document.exitFullscreen(); }
+  else{ document.documentElement.requestFullscreen(); }
+};
+
+function render(){ renderTabs(); renderBoard(); renderTotals(); renderModes(); }
+render();
+</script>
+</body>
+</html>

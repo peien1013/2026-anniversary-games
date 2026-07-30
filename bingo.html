@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>神仙賓果樂</title>
+<style>
+:root{
+  --bg:#1c0d0d;
+  --panel:#2b1414;
+  --line:#7a5a2a;
+  --gold:#ffd76a;
+  --gold-deep:#d4a017;
+  --dim:#b3945f;
+  --red:#b3282d;
+  --ink:#5a1212;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  background:radial-gradient(ellipse at top,#2a1010 0%,var(--bg) 70%);
+  color:var(--gold);
+  font-family:"Microsoft JhengHei","PingFang TC","Noto Sans TC",sans-serif;
+  overflow:hidden;
+}
+
+/* ===== 主畫面 ===== */
+#app{height:100vh;display:flex;flex-direction:column;padding:10px 14px;gap:8px}
+
+header{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+header h1{font-size:clamp(20px,2.6vw,34px);letter-spacing:3px;text-shadow:0 0 12px rgba(255,215,106,.35)}
+.count{font-size:clamp(14px,1.7vw,22px);color:var(--dim)}
+.spacer{flex:1}
+.btn{
+  background:var(--panel);color:var(--gold);border:1px solid var(--line);
+  border-radius:10px;padding:8px 14px;font-size:clamp(13px,1.4vw,17px);
+  font-family:inherit;cursor:pointer;white-space:nowrap;
+}
+.btn:hover{background:#3a1c1c;border-color:var(--gold-deep)}
+.btn.warn{color:#ff9d9d;border-color:#7a3a3a}
+
+#banner{
+  display:flex;align-items:center;justify-content:center;gap:24px;
+  background:linear-gradient(180deg,#3a1616,#2b1010);
+  border:2px solid var(--line);border-radius:16px;
+  padding:6px 18px;min-height:clamp(80px,15vh,160px);
+}
+#bannerLabel{font-size:clamp(15px,1.8vw,24px);color:var(--dim);white-space:nowrap}
+#bannerName{
+  display:flex;align-items:center;gap:18px;
+  font-weight:900;letter-spacing:4px;
+  color:var(--gold);text-shadow:0 0 20px rgba(255,215,106,.55);
+  line-height:1.1;text-align:center;
+}
+#bannerNo{
+  background:var(--red);color:#fff;border-radius:18px;
+  padding:2px 26px;font-size:clamp(48px,13vh,150px);font-weight:900;
+  text-shadow:none;letter-spacing:0;
+}
+#bannerNo:empty{display:none}
+#bannerTxt{font-size:clamp(34px,9vh,90px)}
+#bannerName.pop{animation:pop .45s ease}
+@keyframes pop{0%{transform:scale(.5);opacity:0}60%{transform:scale(1.12)}100%{transform:scale(1);opacity:1}}
+#bannerPrev{font-size:clamp(13px,1.6vw,20px);color:var(--dim);white-space:nowrap}
+
+#grid{
+  flex:1;display:grid;gap:8px;min-height:0;
+}
+.tile{
+  position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  background:var(--panel);border:2px solid #4a2c1a;border-radius:12px;
+  color:var(--dim);
+  cursor:pointer;user-select:none;
+  padding:2px 6px;text-align:center;line-height:1.1;
+  transition:transform .08s ease;overflow:hidden;
+}
+.tile:hover{transform:scale(1.02);border-color:var(--line)}
+.tile .no{
+  font-size:var(--noSize,clamp(28px,6.5vh,84px));font-weight:900;color:var(--gold);
+  line-height:1;
+}
+.tile .nm{
+  font-size:var(--nmSize,clamp(13px,2.2vh,28px));font-weight:700;letter-spacing:1px;
+}
+.tile.drawn{
+  background:linear-gradient(160deg,#ffe9a8,#f0c04a 55%,#d4a017);
+  color:var(--ink);border-color:#fff0c0;
+  box-shadow:0 0 14px rgba(255,215,106,.45);
+}
+.tile.drawn .no{color:var(--red)}
+
+#history{
+  display:flex;gap:6px;overflow-x:auto;padding:4px 2px;flex:none;
+  scrollbar-width:thin;
+}
+#history:empty{display:none}
+.chip{
+  flex:none;background:var(--panel);border:1px solid var(--line);border-radius:999px;
+  padding:4px 12px;font-size:clamp(13px,1.5vw,18px);color:var(--dim);white-space:nowrap;
+}
+.chip b{color:var(--gold)}
+
+/* ===== 編輯名單彈窗 ===== */
+#overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.75);display:none;
+  align-items:center;justify-content:center;z-index:50;
+}
+#overlay.show{display:flex}
+#editBox{
+  background:var(--panel);border:2px solid var(--line);border-radius:16px;
+  padding:20px;width:min(480px,92vw);max-height:90vh;display:flex;flex-direction:column;gap:12px;
+}
+#editBox h2{font-size:20px}
+#editBox p{color:var(--dim);font-size:14px;line-height:1.5}
+#nameInput{
+  flex:1;min-height:300px;background:#1a0c0c;color:var(--gold);
+  border:1px solid var(--line);border-radius:10px;padding:10px;
+  font-family:inherit;font-size:16px;line-height:1.6;resize:vertical;
+}
+.overlayBtns{display:flex;gap:10px;justify-content:flex-end}
+
+</style>
+</head>
+<body>
+
+<div id="app">
+  <header>
+    <h1>🏮 神仙賓果樂</h1>
+    <span class="count" id="count"></span>
+    <span class="spacer"></span>
+    <button class="btn" id="btnUndo">↩ 復原上一抽</button>
+    <button class="btn" id="btnRandom">🎲 隨機抽一尊</button>
+    <button class="btn" id="btnEdit">✏️ 編輯名單</button>
+    <button class="btn" id="btnFull">⛶ 全螢幕</button>
+    <button class="btn" id="btnSave">☁ 存到試算表</button>
+    <button class="btn warn" id="btnReset">🔄 重新開始</button>
+  </header>
+
+  <div id="banner">
+    <span id="bannerLabel"></span>
+    <span id="bannerName"><span id="bannerNo"></span><span id="bannerTxt"></span></span>
+    <span id="bannerPrev"></span>
+  </div>
+
+  <div id="grid"></div>
+
+  <div id="history"></div>
+</div>
+
+<div id="overlay">
+  <div id="editBox">
+    <h2>✏️ 編輯仙佛名單</h2>
+    <p>一行一尊聖號，建議共 36 尊（6×6）。編號會依照順序自動編為 1、2、3…。修改名單會清空目前的抽出紀錄。</p>
+    <textarea id="nameInput" spellcheck="false"></textarea>
+    <div class="overlayBtns">
+      <button class="btn" id="btnCancelEdit">取消</button>
+      <button class="btn" id="btnSaveEdit">💾 儲存名單</button>
+    </div>
+  </div>
+</div>
+
+<script>
+var LS_NAMES='sxbingo_names36', LS_DRAWN='sxbingo_drawn36';
+
+var DEFAULT_NAMES=[
+"無極金龍大太子","鑽石財神爺","36天金面天公","王母娘娘","金母娘娘","地母娘娘",
+"驪山老母","九天玄女","大日如來佛祖","地藏王菩薩","法師公","藥師如來佛祖",
+"千手觀音","送子觀音","準提菩薩","元始天尊","靈寶天尊","道德天尊",
+"濟公師父","太陽神君","中壇元帥","齊天大聖孫悟空","北極玄天上帝","南天文衡聖帝",
+"關聖帝君","南極仙翁","白鶴童子","南斗星君","北斗星君","太陰仙子",
+"福德正神","月老","東海龍王","二郎神君","聖母娘娘","鳳凰母娘"
+];
+
+function loadJSON(key){
+  try{ var v=localStorage.getItem(key); return v?JSON.parse(v):null; }catch(e){ return null; }
+}
+function saveJSON(key,val){
+  try{ localStorage.setItem(key,JSON.stringify(val)); }catch(e){}
+}
+
+var names = loadJSON(LS_NAMES) || DEFAULT_NAMES.slice();
+var drawn = loadJSON(LS_DRAWN) || [];
+drawn = drawn.filter(function(i){ return Number.isInteger(i) && i>=0 && i<names.length; });
+
+var $ = function(id){ return document.getElementById(id); };
+
+function cols(){
+  if(names.length===25) return 5;
+  if(names.length===36) return 6;
+  return Math.ceil(Math.sqrt(names.length));
+}
+
+function render(animate){
+  // 格子:編號+聖號
+  var grid=$('grid');
+  grid.style.gridTemplateColumns='repeat('+cols()+',1fr)';
+  grid.innerHTML='';
+  names.forEach(function(name,i){
+    var d=document.createElement('div');
+    d.className='tile';
+    if(drawn.indexOf(i)>=0) d.classList.add('drawn');
+    var no=document.createElement('span');
+    no.className='no';
+    no.textContent=i+1;
+    var nm=document.createElement('span');
+    nm.className='nm';
+    nm.textContent=name;
+    d.appendChild(no);
+    d.appendChild(nm);
+    d.onclick=function(){ toggle(i); };
+    grid.appendChild(d);
+  });
+
+  // 計數
+  $('count').textContent='已抽 '+drawn.length+' / '+names.length;
+
+  // 大字看板
+  var bn=$('bannerName');
+  bn.classList.remove('pop');
+  if(drawn.length===0){
+    $('bannerLabel').textContent='';
+    $('bannerNo').textContent='';
+    $('bannerTxt').textContent='紙本抽籤後，點選聖號即可記錄';
+    $('bannerTxt').style.fontSize='clamp(20px,3vw,40px)';
+    $('bannerPrev').textContent='';
+  }else{
+    var last=drawn[drawn.length-1];
+    $('bannerTxt').style.fontSize='';
+    $('bannerLabel').textContent='第 '+drawn.length+' 抽';
+    $('bannerNo').textContent=last+1;
+    $('bannerTxt').textContent=names[last];
+    $('bannerPrev').textContent = drawn.length>1
+      ? '上一尊：'+(drawn[drawn.length-2]+1)+' '+names[drawn[drawn.length-2]] : '';
+    if(animate){ void bn.offsetWidth; bn.classList.add('pop'); }
+  }
+
+  // 歷史紀錄列
+  var h=$('history');
+  h.innerHTML='';
+  drawn.forEach(function(idx,k){
+    var c=document.createElement('span');
+    c.className='chip';
+    c.innerHTML=(k+1)+'. <b></b>';
+    c.querySelector('b').textContent=(idx+1)+' '+names[idx];
+    h.appendChild(c);
+  });
+  h.scrollLeft=h.scrollWidth;
+
+  saveJSON(LS_DRAWN,drawn);
+  fitTiles();
+}
+
+/* 依格子實際高度放大字級,數字越大越好但不爆格 */
+function fitTiles(){
+  var t=document.querySelector('.tile');
+  if(!t) return;
+  var h=t.clientHeight;
+  var grid=$('grid');
+  grid.style.setProperty('--noSize', Math.max(22, Math.floor(h*0.5))+'px');
+  grid.style.setProperty('--nmSize', Math.max(12, Math.floor(h*0.24))+'px');
+}
+window.addEventListener('resize', fitTiles);
+
+function toggle(i){
+  var order=drawn.indexOf(i);
+  if(order>=0){
+    if(!confirm('要取消「'+(i+1)+' '+names[i]+'」（第 '+(order+1)+' 抽）的紀錄嗎？')) return;
+    drawn.splice(order,1);
+    render(false);
+  }else{
+    drawn.push(i);
+    render(true);
+  }
+}
+
+$('btnUndo').onclick=function(){
+  if(drawn.length===0) return;
+  drawn.pop();
+  render(false);
+};
+
+$('btnRandom').onclick=function(){
+  var remain=[];
+  names.forEach(function(_,i){ if(drawn.indexOf(i)<0) remain.push(i); });
+  if(remain.length===0){ alert('全部都抽完囉！'); return; }
+  drawn.push(remain[Math.floor(Math.random()*remain.length)]);
+  render(true);
+};
+
+$('btnReset').onclick=function(){
+  if(drawn.length===0) return;
+  if(!confirm('確定要清空全部 '+drawn.length+' 筆抽出紀錄、重新開始嗎？')) return;
+  drawn=[];
+  render(false);
+};
+
+$('btnFull').onclick=function(){
+  if(document.fullscreenElement){ document.exitFullscreen(); }
+  else{ document.documentElement.requestFullscreen(); }
+};
+
+/* ☁ 存到試算表 — 把這場抽出順序存進分頁「神仙賓果紀錄」。
+   掛網路上(?page=bingo)用 google.script.run；本機 file:// 用 JSONP。 */
+var LOG_URL='https://script.google.com/macros/s/AKfycbwtj0WI6GPldwi5jfUVeboLuVi9s22FT2nfdcP1NwsfSgpdPsT1koJcao0_0TwS1Fnu/exec';
+$('btnSave').onclick=function(){
+  if(drawn.length===0){ alert('目前還沒抽出任何一尊，沒東西可存。'); return; }
+  if(!confirm('要把這場「共 '+drawn.length+' 抽」的紀錄存到 Google 試算表嗎？\n（需要網路；會存到分頁「神仙賓果紀錄」）')) return;
+  var items=drawn.map(function(i){ return (i+1)+','+names[i]; }).join(';');
+  function okMsg(res){ if(res && res.ok){ alert('✅ 已存到試算表！\n這場共 '+res.saved+' 抽（'+res.at+'）。\n到試算表分頁「神仙賓果紀錄」就看得到。'); } else { alert('存檔失敗：'+((res&&res.error)||'請確認網路後再試')); } }
+  function errMsg(){ alert('連線失敗，請確認網路後再按一次。'); }
+
+  // 掛在網站上：用 google.script.run（最穩）
+  if(window.google && google.script && google.script.run){
+    google.script.run.withSuccessHandler(okMsg).withFailureHandler(errMsg).bingoSaveRun(items);
+    return;
+  }
+  // 本機 file:// 檔案：用 JSONP
+  var cbName='sxcb'+(new Date().getTime());
+  var s=document.createElement('script'), done=false;
+  function cleanup(){ try{ delete window[cbName]; }catch(e){ window[cbName]=undefined; } if(s.parentNode) s.parentNode.removeChild(s); clearTimeout(timer); }
+  var timer=setTimeout(function(){ if(done) return; done=true; cleanup(); alert('連線逾時，請確認網路後再按一次。'); }, 12000);
+  window[cbName]=function(res){ if(done) return; done=true; cleanup(); okMsg(res); };
+  s.onerror=function(){ if(done) return; done=true; cleanup(); errMsg(); };
+  s.src=LOG_URL+'?action=bingoSave&cb='+cbName+'&items='+encodeURIComponent(items);
+  document.body.appendChild(s);
+};
+
+/* ---- 編輯名單 ---- */
+$('btnEdit').onclick=function(){
+  $('nameInput').value=names.join('\n');
+  $('overlay').classList.add('show');
+};
+$('btnCancelEdit').onclick=function(){ $('overlay').classList.remove('show'); };
+$('btnSaveEdit').onclick=function(){
+  var lines=$('nameInput').value.split('\n')
+    .map(function(s){ return s.trim(); })
+    .filter(function(s){ return s.length>0; });
+  if(lines.length<25){ alert('至少需要 25 尊聖號（賓果卡要填 25 格），目前只有 '+lines.length+' 尊。'); return; }
+  if(lines.length!==36 && !confirm('目前名單為 '+lines.length+' 尊（建議 36 尊）。仍要儲存嗎？')) return;
+  if(drawn.length>0 && !confirm('修改名單會清空目前 '+drawn.length+' 筆抽出紀錄，確定嗎？')) return;
+  names=lines;
+  drawn=[];
+  saveJSON(LS_NAMES,names);
+  $('overlay').classList.remove('show');
+  render(false);
+};
+
+render(false);
+</script>
+</body>
+</html>
