@@ -176,6 +176,14 @@ header h1{font-size:clamp(20px,2.6vw,34px);letter-spacing:3px;text-shadow:0 0 12
   font-size:clamp(20px,3.2vh,32px);
 }
 #rollOverlay.settling #rollTotals{display:none}
+#btnRandomRoll{
+  background:none;color:var(--dim);border:1px dashed var(--line);
+  border-radius:12px;padding:8px 20px;
+  font-size:clamp(14px,2.2vh,20px);font-weight:700;font-family:inherit;cursor:pointer;
+  letter-spacing:1px;
+}
+#btnRandomRoll:hover{color:var(--gold);border-color:var(--gold-deep)}
+#rollOverlay.settling #btnRandomRoll{display:none}
 </style>
 </head>
 <body>
@@ -209,6 +217,7 @@ header h1{font-size:clamp(20px,2.6vw,34px);letter-spacing:3px;text-shadow:0 0 12
   <div id="rollDice"></div>
   <div id="rollTotal"></div>
   <div id="rollTotals"></div>
+  <button id="btnRandomRoll">🎰 沒骰子？電腦隨機開骰</button>
   <div id="rollHint"></div>
 </div>
 
@@ -389,7 +398,7 @@ function cancelIdle(){
   sessionLeft=0;
 }
 
-function settleRoll(total){
+function settleRoll(total,fixedCombo){
   if(phase==='settle') return;
   if(phase!=='idle'){ sessionLeft=1; sessionTotal=1; startIdle(); } // 直接按總分=單擲快速路徑
   phase='settle';
@@ -397,7 +406,7 @@ function settleRoll(total){
   $('rollHint').textContent='（點一下畫面可跳過）';
   var list=state.rounds[state.cur];
   var name=$('rollName').textContent;
-  var combo=comboFor(total);
+  var combo=fixedCombo||comboFor(total);
   $('rollTotal').textContent=total+' 分';
 
   // 四顆骰子依序停下
@@ -439,6 +448,14 @@ $('btnRollStart').onclick=function(){
   startIdle();
 };
 $('rollOverlay').onclick=function(){ if(phase==='settle' && rollDone) rollDone(); };
+
+/* 備用:電腦真隨機擲四顆(實體骰子出狀況時用) */
+$('btnRandomRoll').onclick=function(ev){
+  ev.stopPropagation();
+  if(phase==='settle') return;
+  var d=[0,0,0,0].map(function(){ return 1+Math.floor(Math.random()*6); });
+  settleRoll(d.reduce(function(a,b){ return a+b; },0), d);
+};
 
 /* 模式切換 */
 function renderModes(){
