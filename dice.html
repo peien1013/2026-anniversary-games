@@ -198,7 +198,6 @@ header h1{font-size:clamp(20px,2.6vw,34px);letter-spacing:3px;text-shadow:0 0 12
     <div id="tabs"></div>
     <span class="spacer"></span>
     <a class="btn" style="text-decoration:none" href="https://peien1013.github.io/2026-anniversary-games/">🏠 回首頁</a>
-    <button class="btn" id="btnSound">🔊 音效</button>
     <button class="btn" id="btnFull">⛶ 全螢幕</button>
     <button class="btn warn" id="btnClearRound">🧹 清空本局</button>
     <button class="btn warn" id="btnResetAll">🔄 全部重來</button>
@@ -236,7 +235,6 @@ var state=loadState();
 if(!state.rounds||!state.rounds.length) state={rounds:[[],[],[],[]],cur:0};
 if(state.cur>=state.rounds.length) state.cur=0;
 if(state.mode!=='triple') state.mode='single';
-if(state.snd===undefined) state.snd=true;
 
 var $=function(id){ return document.getElementById(id); };
 
@@ -355,40 +353,6 @@ function renderTotals(){
   if(!$('rollTotals').hasChildNodes()) fillTotals($('rollTotals'),settleRoll);
 }
 
-/* ===== 音效(Web Audio 即時合成,不需音效檔、離線可用) ===== */
-var AC=null;
-function ensureAC(){
-  if(!AC){ try{ AC=new (window.AudioContext||window.webkitAudioContext)(); }catch(e){} }
-  if(AC && AC.state==='suspended'){ try{ AC.resume(); }catch(e){} }
-  return AC;
-}
-/* 一聲骰子敲擊:短促雜訊經帶通濾波,像骰子撞碗 */
-function diceClick(vol,freq){
-  if(state.snd===false) return;
-  var ctx=ensureAC(); if(!ctx) return;
-  try{
-    var len=Math.floor(ctx.sampleRate*0.045);
-    var buf=ctx.createBuffer(1,len,ctx.sampleRate);
-    var d=buf.getChannelData(0);
-    for(var i=0;i<len;i++){ var f=1-i/len; d[i]=(Math.random()*2-1)*f*f; }
-    var src=ctx.createBufferSource(); src.buffer=buf;
-    var bp=ctx.createBiquadFilter(); bp.type='bandpass'; bp.frequency.value=freq; bp.Q.value=1.4;
-    var g=ctx.createGain(); g.gain.value=vol;
-    src.connect(bp); bp.connect(g); g.connect(ctx.destination);
-    src.start();
-  }catch(e){}
-}
-/* 滾動中的連續喀啦聲 */
-var rattleTm=null;
-function startRattle(){
-  stopRattle();
-  (function tick(){
-    diceClick(0.10+Math.random()*0.22, 900+Math.random()*2400);
-    rattleTm=setTimeout(tick, 50+Math.random()*110);
-  })();
-}
-function stopRattle(){ if(rattleTm){ clearTimeout(rattleTm); rattleTm=null; } }
-
 /* ===== 擲骰動畫:兩階段 =====
    phase 'idle'  = 骰子持續滾動,等主持人按總分
    phase 'settle'= 收尾:依序停下→亮總分→自動記錄 */
@@ -398,8 +362,6 @@ var sessionLeft=0, sessionTotal=1; // 連擲模式:一組還剩幾擲/共幾擲
 function startIdle(){
   if(phase) return;
   phase='idle';
-  ensureAC();
-  startRattle();
   var list=state.rounds[state.cur];
   $('rollName').textContent='第 '+(list.length+1)+' 擲';
   $('rollTotal').classList.remove('show');
@@ -431,7 +393,6 @@ function startIdle(){
 function cancelIdle(){
   if(phase!=='idle') return;
   clearInterval(rollIv);
-  stopRattle();
   $('rollOverlay').classList.remove('show');
   phase=null;
   sessionLeft=0;
@@ -455,14 +416,12 @@ function settleRoll(total,fixedCombo){
       w.classList.remove('rolling');
       w.innerHTML='';
       w.appendChild(makeDie(combo[i],false));
-      diceClick(0.55, 650+Math.random()*350); // 停下的「叩」一聲
     }, 600+i*280));
   });
 
   // 全部停下後亮出總分
   rollTimers.push(setTimeout(function(){
     clearInterval(rollIv);
-    stopRattle();
     $('rollTotal').classList.add('show');
   }, 600+3*280+150));
 
@@ -470,7 +429,6 @@ function settleRoll(total,fixedCombo){
     rollTimers.forEach(function(t){ clearTimeout(t); });
     rollTimers=[];
     clearInterval(rollIv);
-    stopRattle();
     list.push({n:name,d:combo});
     phase=null;
     rollDone=null;
@@ -504,15 +462,9 @@ function renderModes(){
   $('modeSingle').classList.toggle('active', state.mode!=='triple');
   $('modeTriple').classList.toggle('active', state.mode==='triple');
   $('btnRollStart').textContent = state.mode==='triple' ? '🎲 開始連擲三次' : '🎲 開始擲骰';
-  $('btnSound').textContent = state.snd===false ? '🔇 靜音中' : '🔊 音效';
 }
 $('modeSingle').onclick=function(){ state.mode='single'; save(); renderModes(); };
 $('modeTriple').onclick=function(){ state.mode='triple'; save(); renderModes(); };
-$('btnSound').onclick=function(){
-  state.snd=(state.snd===false);
-  if(state.snd){ ensureAC(); diceClick(0.5,900); } // 開音效時叩一聲當回饋
-  save(); renderModes();
-};
 
 /* ===== 鍵盤:打數字按 Enter(滾動中也可用);Esc 取消 ===== */
 var keyBuf='';
