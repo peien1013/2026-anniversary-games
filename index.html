@@ -24,13 +24,34 @@ a.game{
   background:#2b1414;border:3px solid #7a5a2a;border-radius:26px;
   padding:16px 16px 2vh;text-decoration:none;color:#ffd76a;
   width:min(88vw,30vw,56vh);min-width:260px;
-  transition:transform .12s ease;
+  transition:transform .15s ease,border-color .15s ease;
+  animation:breathe 2.8s ease-in-out infinite;
+}
+.games a.game:nth-child(2){animation-delay:.9s}
+.games a.game:nth-child(3){animation-delay:1.8s}
+@keyframes breathe{
+  0%,100%{box-shadow:0 0 12px rgba(255,215,106,.22)}
+  50%{box-shadow:0 0 30px rgba(255,215,106,.6),0 0 60px rgba(255,180,60,.25)}
 }
 a.game:hover{
-  transform:scale(1.04);border-color:#d4a017;
-  box-shadow:0 0 24px rgba(255,215,106,.4);
+  transform:scale(1.06);border-color:#ffd76a;
+  animation:none;
+  box-shadow:0 0 40px rgba(255,215,106,.9),0 0 90px rgba(255,180,60,.5),0 0 140px rgba(255,150,40,.3);
 }
-a.game img{width:100%;height:auto;border-radius:18px;display:block}
+.imgwrap{position:relative;overflow:hidden;border-radius:18px;width:100%}
+.imgwrap img{width:100%;height:auto;display:block}
+.imgwrap::after{
+  content:'';position:absolute;top:-60%;left:-85%;width:55%;height:220%;
+  transform:rotate(25deg);
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.8),transparent);
+  opacity:0;pointer-events:none;
+}
+a.game:hover .imgwrap::after{animation:shine .9s ease}
+@keyframes shine{
+  0%{left:-85%;opacity:0}
+  25%{opacity:1}
+  100%{left:135%;opacity:0}
+}
 .desc{font-size:clamp(15px,2.4vh,22px);color:#e8c987;letter-spacing:2px;text-align:center}
 </style>
 </head>
@@ -38,15 +59,15 @@ a.game img{width:100%;height:auto;border-radius:18px;display:block}
 <h1>🏮 2026 週年慶遊戲 🏮</h1>
 <div class="games">
   <a class="game" href="bingo.html">
-    <img src="img/bingo.png" alt="神仙賓果樂">
+    <span class="imgwrap"><img src="img/bingo.png" alt="神仙賓果樂"></span>
     <span class="desc">36 尊仙佛・抽籤對號賓果</span>
   </a>
   <a class="game" href="dice.html">
-    <img src="img/dice.png" alt="歡樂骰子王">
+    <span class="imgwrap"><img src="img/dice.png" alt="歡樂骰子王"></span>
     <span class="desc">四顆骰子・選號對獎</span>
   </a>
   <a class="game" href="https://script.google.com/macros/s/AKfycbwtj0WI6GPldwi5jfUVeboLuVi9s22FT2nfdcP1NwsfSgpdPsT1koJcao0_0TwS1Fnu/exec?page=score">
-    <img src="img/charades.png" alt="比手畫腳">
+    <span class="imgwrap"><img src="img/charades.png" alt="比手畫腳"></span>
     <span class="desc">一起來猜題・即時計分榜</span>
   </a>
 </div>
