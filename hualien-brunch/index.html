@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-<title>10/19 早午餐時段登記｜2026 花蓮宜蘭之旅</title>
-<meta property="og:title" content="🍽 10/19 早午餐時段登記">
+<title>10/19 早午餐用餐分流登記｜2026 花蓮宜蘭之旅</title>
+<meta property="og:title" content="🍽 10/19 早午餐 用餐分流登記">
 <meta property="og:description" content="長榮礁溪自助式早午餐 · 一房派一人登記，同房的人一起登記同一個時段">
 <meta name="description" content="長榮礁溪自助式早午餐 · 一房派一人登記，同房的人一起登記同一個時段">
 <style>
@@ -17,13 +17,6 @@
   h1 { font-size: 28px; color: #5b351b; margin: 4px 0 2px; text-align: center; }
   .sub { text-align: center; color: #7a5a3a; font-size: 20px; font-weight: 700; margin-bottom: 10px; }
   .rule { font-size: 18px; line-height: 1.7; color: #5a4632; background: #fff8ea; border: 1px dashed #d4a017; border-radius: 12px; padding: 10px 14px; }
-  .counts { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  .cnt { border-radius: 14px; padding: 12px 8px; text-align: center; }
-  .cnt .t { font-size: 17px; font-weight: 800; }
-  .cnt .n { font-size: 30px; font-weight: 900; margin: 2px 0; }
-  .cnt .s { font-size: 16px; font-weight: 700; }
-  .cntA { background: #eaf4ff; color: #0f3f7a; }
-  .cntB { background: #fff3d6; color: #6a4800; }
   .step { font-size: 21px; font-weight: 900; color: #5b351b; margin-bottom: 8px; }
   input#name { width: 100%; font-size: 24px; padding: 14px; border: 2px solid #cdb89a; border-radius: 12px; }
   button { font-family: inherit; }
@@ -39,7 +32,7 @@
   .slot { border: 3px solid #d9d0c3; border-radius: 16px; padding: 14px 6px; text-align: center; background: #fff; cursor: pointer; user-select: none; }
   .slot .k { font-size: 18px; font-weight: 900; color: #7a5a3a; }
   .slot .tm { font-size: 24px; font-weight: 900; margin: 4px 0; }
-  .slot .left { font-size: 16px; font-weight: 700; color: #555; }
+  .slot .left { font-size: 16px; font-weight: 700; color: #c0392b; }
   .slot.sel { border-color: #1c7c3a; background: #eefaf0; box-shadow: inset 0 0 0 3px rgba(28,124,58,.18); }
   .slot.sel .k::after { content: " ✔"; color: #1c7c3a; }
   .slot.off { opacity: .45; cursor: not-allowed; }
@@ -60,18 +53,11 @@
   <div class="card">
     <div class="brand">2026 虛空無極殿 · 花蓮宜蘭之旅</div>
     <h1>🍽 10/19（一）早午餐</h1>
-    <div class="sub">長榮礁溪 自助式早午餐 · 時段登記</div>
+    <div class="sub">長榮礁溪 自助式早午餐 · 用餐分流</div>
     <div class="rule">
       一房派<b>一個人</b>登記就好，<b>同房的人會一起</b>登記同一個時段。<br>
       第一時段 10:00–11:30 約 <b>100 人</b>（最多 110 人，額滿請選第二時段）；<br>
-      沒有登記的人，一律在<b>第二時段 11:30–13:00</b>。
-    </div>
-  </div>
-
-  <div class="card">
-    <div class="counts">
-      <div class="cnt cntA"><div class="t">第一時段 10:00–11:30</div><div class="n" id="nA">…</div><div class="s" id="sA"></div></div>
-      <div class="cnt cntB"><div class="t">第二時段 11:30–13:00</div><div class="n" id="nB">…</div><div class="s">含還沒登記的人</div></div>
+      沒有登記的人，<b>由小秘書分配</b>，感謝！
     </div>
   </div>
 
@@ -89,7 +75,7 @@
     <div class="step" style="margin-top:16px">③ 選時段</div>
     <div class="slots">
       <div class="slot" id="slotA"><div class="k">第一時段</div><div class="tm">10:00–11:30</div><div class="left" id="leftA"></div></div>
-      <div class="slot" id="slotB"><div class="k">第二時段</div><div class="tm">11:30–13:00</div><div class="left">不限人數</div></div>
+      <div class="slot" id="slotB"><div class="k">第二時段</div><div class="tm">11:30–13:00</div></div>
     </div>
     <button class="btn" id="btnSend" disabled>送出</button>
     <div class="msg" id="msg2"></div>
@@ -139,14 +125,6 @@ function api(params, ok, fail) {
   document.body.appendChild(s);
 }
 
-function showCounts(c) {
-  if (!c) return;
-  var left = Math.max(c.capA - c.countA, 0);
-  $('nA').textContent = c.countA + ' 人';
-  $('sA').textContent = left > 0 ? '約 ' + c.targetA + ' 人・還可登記 ' + left + ' 位' : '已額滿（最多 ' + c.capA + ' 人）';
-  $('nB').textContent = c.countB + ' 人';
-}
-
 function find() {
   var n = $('name').value.trim();
   if (!n) { $('msg1').className = 'msg err'; $('msg1').textContent = '請先輸入名字'; return; }
@@ -157,7 +135,6 @@ function find() {
 }
 
 function render(r, okMsg, errMsg) {
-  showCounts(r.counts);
   if (!r.ok) { $('msg1').className = 'msg err'; $('msg1').textContent = r.msg || '查無此人'; $('step2').classList.add('hidden'); return; }
   cur = r; pick = '';
   $('msg1').textContent = '';
@@ -166,11 +143,11 @@ function render(r, okMsg, errMsg) {
   var c = r.counts;
   $('now').innerHTML = r.slot
     ? '✅ 已登記：<b>' + esc(slotName(c, r.slot)) + '</b><br><span style="font-size:17px;color:#666">（' + esc(r.by) + (r.at ? ' ' + esc(r.at) : '') + ' 登記；要改時段，在下面重選再送出）</span>'
-    : '目前：<b>第二時段 ' + esc(c.labelB) + '</b>（還沒登記）';
+    : '目前：<b>還沒登記</b>（沒登記的人由小秘書分配）';
+  // 第一時段名額不夠整房就擋掉，但不顯示人數
   var mineA = r.slot === c.labelA ? r.room.length : 0;
-  var left = c.capA - c.countA + mineA;
-  var okA = left >= r.room.length;
-  $('leftA').textContent = okA ? '還可登記 ' + Math.max(left, 0) + ' 位' : '已額滿（最多 ' + c.capA + ' 人）';
+  var okA = c.capA - c.countA + mineA >= r.room.length;
+  $('leftA').textContent = okA ? '' : '已額滿';
   $('slotA').classList.toggle('off', !okA);
   $('slotA').classList.remove('sel'); $('slotB').classList.remove('sel');
   $('btnSend').disabled = true;
@@ -221,7 +198,8 @@ $('btnSend').onclick = askConfirm;
 $('btnNo').onclick = function () { $('ov').classList.remove('show'); };
 $('btnYes').onclick = send;
 $('btnReset').onclick = function () { cur = null; pick = ''; $('step2').classList.add('hidden'); $('msg1').textContent = ''; $('name').value = ''; $('name').focus(); window.scrollTo(0, 0); };
-api({ action: 'brunch', name: '' }, function (r) { showCounts(r.counts); }, function () {});
+// 先叫醒後端，第一次查詢比較快（結果不用顯示）
+api({ action: 'brunch', name: '' }, function () {}, function () {});
 </script>
 </body>
 </html>
