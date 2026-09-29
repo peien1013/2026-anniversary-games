@@ -143,7 +143,7 @@ function render(r, okMsg, errMsg) {
   var c = r.counts;
   $('now').innerHTML = r.slot
     ? '✅ 已登記：<b>' + esc(slotName(c, r.slot)) + '</b><br><span style="font-size:17px;color:#666">（' + esc(r.by) + (r.at ? ' ' + esc(r.at) : '') + ' 登記；要改時段，在下面重選再送出）</span>'
-    : '目前：<b>還沒登記</b>（沒登記的人由小秘書分配）';
+    : '';
   // 第一時段名額不夠整房就擋掉，但不顯示人數
   var mineA = r.slot === c.labelA ? r.room.length : 0;
   var okA = c.capA - c.countA + mineA >= r.room.length;
