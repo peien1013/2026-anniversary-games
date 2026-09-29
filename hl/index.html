@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>我的行程｜2026 花蓮宜蘭之旅</title>
+<style>
+  body { margin: 0; padding: 48px 16px; text-align: center; background: #f7f1e8; color: #5b351b;
+         font-family: "Noto Sans TC", "Microsoft JhengHei", Arial, sans-serif; font-size: 22px; }
+  .t { font-size: 26px; font-weight: 900; margin-bottom: 18px; }
+  a { display: inline-block; margin-top: 18px; padding: 14px 22px; border-radius: 12px;
+      background: #8b542f; color: #fff; font-weight: 900; text-decoration: none; }
+</style>
+</head>
+<body>
+<div class="t">🚄 正在打開你的行程…</div>
+<div>2026 花蓮宜蘭之旅</div>
+<a id="go" href="#">沒有自動打開，請按這裡</a>
+<script>
+// 識別證上的 QR 碼 → 這一頁（網址後面帶 5 碼代碼）→ 轉到行程查詢系統 ?k=代碼，直接顯示這個人的資料
+// QR 碼放短網址才印得小又好掃；查詢系統本身的網址太長
+var EXEC = 'https://script.google.com/macros/s/AKfycbwlWbZzxvpgdG6CU9LS4bczYSzgpM9cxd8-CJWTbKtxJvFM3nX05Dk_5NrAaE2gK7SN/exec';
+var k = (location.search || '').replace(/^\?/, '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 5);
+var url = EXEC + (k.length === 5 ? '?k=' + k : '');
+document.getElementById('go').href = url;
+location.replace(url);
+</script>
+</body>
+</html>
